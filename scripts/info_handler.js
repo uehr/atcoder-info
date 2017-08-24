@@ -2,14 +2,16 @@
 var async = require("async");
 var moment = require("moment");
 var fs = require('fs');
-var contest = require("./contests_handler.js");
+var contest = require("./contests_data_handler.js");
 var jsonfile = require("jsonfile");
 
 var config_file_path = "./config.json";
 var msgs_file_path = "./slack_msgs.json";
+var log_file_format = "YYYY-MM-DD";
+var log_file_dir = "./logs";
 
-var config = JSON.parse(fs.readFileSync(config_file_path,"utf-8"));
-var msgs = JSON.parse(fs.readFileSync(msgs_file_path,"utf-8"));
+var config; config_update();
+var msgs; msgs_update();
 
 var timer;
 var DEBUG = false
@@ -36,7 +38,7 @@ module.exports = (robot) => {
     }
   });
 
-  robot.hear(config["bot_name"] + " " + config["debug_cmd"],(msg) => {
+  robot.hear(config["bot_name"] + " " + config["log_mode_cmd"],(msg) => {
     DEBUG = !DEBUG;
     if(DEBUG){
       msg.send(msgs["debug_mode"]);
@@ -57,11 +59,11 @@ module.exports = (robot) => {
     if(config[key]){
       config[key] = new_value;
       jsonfile.writeFile(config_file_path, config, {encoding:"utf-8"});
-      config = JSON.parse(fs.readFileSync(config_file_path,"utf-8"));
+      config_update();
     }else if(msgs[key]){
       msgs[key] = new_value;
       jsonfile.writeFile(msgs_file_path, config, {encoding:"utf-8"});
-      msgs = JSON.parse(fs.readFileSync(msgs_file_path,"utf-8"));
+      msgs_update();
     }else{
       msg.send(msgs["not_found_key"].replace("<key>",key)); 
       return;
@@ -70,12 +72,12 @@ module.exports = (robot) => {
     msg.send(msgs["setting_save"].replace("<key>",key).replace("<value>",new_value));
 
     if(DEBUG){
-      console.log("seting update " + moment().format("YYYY/MM/DD hh:mm"));
+      log("seting update " + moment().format("YYYY/MM/DD hh:mm"));
     }
   });
 
   robot.hear(config["bot_name"] + " " + config["show_config_cmd"],(msg)=>{
-    config = JSON.parse(fs.readFileSync(config_file_path,"utf-8"));
+    config_update();
     var config_data = "";
 
     for(var key in config){
@@ -86,7 +88,7 @@ module.exports = (robot) => {
   });
 
   robot.hear(config["bot_name"] + " " +config["show_msgs_cmd"],(msg)=>{
-    msgs = JSON.parse(fs.readFileSync(msgs_file_path,"utf-8"));
+    msgs_update();
     var msgs_data = "";
 
     for(var key in msgs){
@@ -97,17 +99,30 @@ module.exports = (robot) => {
   });
 };
 
+function log(content){
+  var to_day = moment().format("YYYY-MM-DD");
+  var log_file_path = log_file_dir + "/" + to_day + ".txt";
+  console.log("file:" + log_file_path);
+  fs.writeFile(log_file_path,content,function(err){
+    if(err){
+      console.log(err); 
+    }
+  });
+};
+
 function set_check_interval(msg){
   if(is_running){
     var now = moment();
     if(Number(now.format("mm")) % 5 == 0){ //5分周期に合わせる
       if(DEBUG){
-        console.log("seting interval " + now.format("YYYY/MM/DD hh:mm")); 
+        log("seting interval " + now.format("YYYY/MM/DD hh:mm")); 
       }
+      contest.manage();
       update_check();
       info_check(msg);
-      setInterval(function(){update_check();},config["update_interval"]); //1h
-      setInterval(function(){info_check(msg);},config["info_check_interval"]); //5m
+      setInterval(function(){contest.manage();},config["data_manage_interval"]); 
+      setInterval(function(){update_check();},config["update_interval"]);
+      setInterval(function(){info_check(msg);},config["info_check_interval"]);
       clearInterval(timer);
     }
   }
@@ -126,8 +141,8 @@ function befor_info_target(){
                        "url":fc[i]["url"],
                        "time":fc[i]["time"]});
           if(DEBUG){
-            console.log("geted info target " + now.format("YYYY/MM/DD hh:mm")); 
-            console.log(target);
+            log("geted info target " + now.format("YYYY/MM/DD hh:mm")); 
+            log(target);
           }
         }
       }
@@ -140,7 +155,7 @@ function info_check(msg){
   if(is_running){
     var now = moment();
     if(DEBUG){
-      console.log("info_checking " + now.format("YYYY/MM/DD hh:mm")); 
+      log("info_checking " + now.format("YYYY/MM/DD hh:mm")); 
     }
     var names = "<";
     var date;
@@ -157,10 +172,10 @@ function info_check(msg){
       finish_mstime = start_mstime + Number(targets[i]["time"]) * 60 * 1000;
 
       if(DEBUG){
-        console.log("timer set");
-        console.log("start-mstime:" + start_mstime);
-        console.log("finish-mstime:" + finish_mstime);
-        console.log(moment().format("YYYY/MM/DD hh:mm") + "\n");
+        log("timer set");
+        log("start-mstime:" + start_mstime);
+        log("finish-mstime:" + finish_mstime);
+        log(moment().format("YYYY/MM/DD hh:mm") + "\n");
       }
 
       start_info_timer = setTimeout(function(msg,name,url){
@@ -184,7 +199,7 @@ function info_check(msg){
 function update_check(){
   if(is_running){
     if(DEBUG){
-      console.log("update checking " + moment().format("YYYY/MM/DD hh:mm")); 
+      log("update checking " + moment().format("YYYY/MM/DD hh:mm")); 
     }
     contest.update();
   }
@@ -196,4 +211,12 @@ function start_info(msg,name,url){
 
 function finish_info(msg,name){
   msg.send(msgs["finish_info"].replace("<name>",name));
+}
+
+function config_update(){
+  config = JSON.parse(fs.readFileSync(config_file_path,"utf-8") || "null");
+}
+
+function msgs_update(){
+  msgs = JSON.parse(fs.readFileSync(msgs_file_path,"utf-8") || "null");
 }
