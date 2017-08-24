@@ -8,3 +8,5 @@
     設定上書き : atcoder-info set [キー] [値]  
     設定一覧 : atcoder-info config  
     案内slackメッセージ一覧 : atcoder-info msg  
+
+※運用テスト未実施
