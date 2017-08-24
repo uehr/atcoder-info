@@ -1,1 +1,1 @@
-{"varsion":"1.0.0","bot_name":"atcoder-info","info_h":16,"update_interval":3600000,"info_check_interval":300000,"off_cmd":"off","on_cmd":"on","debug_cmd":"debug","seting_update_cmd":"set","show_config_cmd":"config","msgs_config_cmd":"msgs"}
+{"version":"1.0.0","bot_name":"atcoder-info","info_h":10,"update_interval":3600000,"info_check_interval":300000,"off_cmd":"off","on_cmd":"on","debug_cmd":"debug","seting_update_cmd":"set","show_config_cmd":"config","show_msgs_cmd":"msg"}

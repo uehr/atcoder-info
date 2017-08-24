@@ -12,13 +12,12 @@ var config = JSON.parse(fs.readFileSync(config_file_path,"utf-8"));
 var msgs = JSON.parse(fs.readFileSync(msgs_file_path,"utf-8"));
 
 var timer;
-var version = "1.0.0";
 var DEBUG = false
 var is_running = false;
 var bot_name = "atcoder-info";
 
 module.exports = (robot) => {
-  robot.hear(bot_name + " " + config["on_cmd"],(msg) => {
+  robot.hear(config["bot_name"] + " " + config["on_cmd"],(msg) => {
     if(is_running){
       msg.send(msgs["alredy_on"]);
     }else{
@@ -29,7 +28,7 @@ module.exports = (robot) => {
     }
   });
 
-  robot.hear(bot_name + " " + config["off_cmd"],(msg) => {
+  robot.hear(config["bot_name"] + " " + config["off_cmd"],(msg) => {
     if(is_running){
       msg.send(msgs["off"]); 
       is_running = false;
@@ -37,7 +36,7 @@ module.exports = (robot) => {
     }
   });
 
-  robot.hear(bot_name + " " + config["debug_cmd"],(msg) => {
+  robot.hear(config["bot_name"] + " " + config["debug_cmd"],(msg) => {
     DEBUG = !DEBUG;
     if(DEBUG){
       msg.send(msgs["debug_mode"]);
@@ -46,7 +45,7 @@ module.exports = (robot) => {
     }
   });
 
-  robot.hear(bot_name + " " + config["seting_update_cmd"],(msg) => {
+  robot.hear(config["bot_name"] + " " + config["seting_update_cmd"],(msg) => {
     var args = msg.message.text.replace(bot_name + " " + config["seting_update_cmd"] + " ","");
     var key = args.split(" ")[0];
     var new_value = args.replace(key + " ","");
@@ -72,12 +71,11 @@ module.exports = (robot) => {
 
     if(DEBUG){
       console.log("seting update " + moment().format("YYYY/MM/DD hh:mm"));
-      console.log(config);
-      console.log("");
     }
   });
 
-  robot.hear(config["show_config_cmd"],(msg)=>{
+  robot.hear(config["bot_name"] + " " + config["show_config_cmd"],(msg)=>{
+    config = JSON.parse(fs.readFileSync(config_file_path,"utf-8"));
     var config_data = "";
 
     for(var key in config){
@@ -87,11 +85,12 @@ module.exports = (robot) => {
     msg.send(config_data);
   });
 
-  robot.hear(config["msgs_config_cmd"],(msg)=>{
+  robot.hear(config["bot_name"] + " " +config["show_msgs_cmd"],(msg)=>{
+    msgs = JSON.parse(fs.readFileSync(msgs_file_path,"utf-8"));
     var msgs_data = "";
 
     for(var key in msgs){
-      msgs_data += key + " : " + config[key] + "\n";
+      msgs_data += key + " : " + msgs[key] + "\n";
     }
 
     msg.send(msgs_data);
