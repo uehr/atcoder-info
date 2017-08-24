@@ -1,6 +1,6 @@
 # atcoder-info
 ## AtCoder社のコンテスト案内をするSlack Bot
->コマンド一覧(Slackのメッセージに反応)
+>コマンド一覧 (Slackのメッセージに反応)
 
     bot有効 : atcoder-info on  
     bot無効 : atcoder-info off  
