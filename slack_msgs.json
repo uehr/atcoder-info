@@ -1,0 +1,15 @@
+{
+  "on":"starting atcoder-info <ver>...",
+  "off":"まったね～♪",
+  "alredy_on":"既に働いてますよ～",
+  "intro":"AtCoderのコンテスト案内を担当するatcoder-infoです♪ 一生懸命頑張ります＞＜；",
+  "contest_info":"",
+  "get_err":"GETアクセスが失敗しちゃった…ごめんなさい…；　；",
+  "befor_info":"<name> が今日の <date> から開始します、是非ご参加下さい！",
+  "start_info":"<<url>|<name>> が始まりました～参加する方は頑張ってください！",
+  "finish_info":"皆さん <name>  お疲れ様です～＞＜;",
+  "debug_mode":"debug mode へ移行します",
+  "non_debug_mode":"non debug mode へ移行します",
+  "not_found_key":"<key> が見つかりません＞＜；",
+  "setting_save":"設定を保存しました <key> : <value>"
+}
